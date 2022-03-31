@@ -4,6 +4,10 @@
 # All rights reserved
 # =============
 
+# import the necessary packages
+import RPi.GPIO as GPIO
+import time
+
 class Stepper:
     coils = [
         [1, 0, 0, 0],
