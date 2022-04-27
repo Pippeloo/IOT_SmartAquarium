@@ -1,6 +1,7 @@
 from classes.stepper import Stepper
 from classes.pushButton import PushButton
 from classes.ultrasonicSensor import UltrasonicSensor
+from classes.relay import Relay
 import time
 import RPi.GPIO as GPIO
 
@@ -10,6 +11,8 @@ stepperPins = [26, 19, 13, 6]
 buttonPins = [21, 20, 16, 12]
 ultrasonicTriggerPin = 23
 ultrasonicEchoPin = 24
+relayLampPin = 4
+relayPumpPin = 17
 
 stepper = Stepper(stepperPins)
 buttonOne = PushButton(buttonPins[0])
@@ -17,6 +20,8 @@ buttonTwo = PushButton(buttonPins[1])
 buttonThree = PushButton(buttonPins[2])
 buttonFour = PushButton(buttonPins[3])
 ultrasonic = UltrasonicSensor(ultrasonicEchoPin, ultrasonicTriggerPin)
+relayLamp = Relay(relayLampPin)
+relayPump = Relay(relayPumpPin)
 
 shouldRun = True
 lastButtonOne = False
@@ -25,6 +30,9 @@ lastButtonThree = False
 lastButtonFour = False
 
 # ====== MAIN ======
+relayLamp.set(True)
+relayPump.set(True)
+
 print("Rotating CW")
 stepper.rotate(360, "CW")
 
@@ -55,9 +63,13 @@ try:
         if lastButtonTwo != buttonTwoStatus:
             print("Button Two: " + str(buttonTwoStatus))
             lastButtonTwo = buttonTwoStatus
+            if buttonTwoStatus:
+                relayLamp.toggle()
         if lastButtonThree != buttonThreeStatus:
             print("Button Three: " + str(buttonThreeStatus))
             lastButtonThree = buttonThreeStatus
+            if buttonThreeStatus:
+                relayPump.toggle()
         if lastButtonFour != buttonFourStatus:
             print("Button Four: " + str(buttonFourStatus))
             lastButtonFour = buttonFourStatus
