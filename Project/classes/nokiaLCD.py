@@ -75,35 +75,3 @@ class NokiaLCD:
         self.image = Image.open(image)
         self.display.image(self.image.resize((self.display.width, self.display.height), Image.ANTIALIAS).convert('1'))
         self.display.show()
-
-
-
-# ====== MAIN ======
-nokiaLCD = NokiaLCD(busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO), board.D22, board.CE1, board.D27)
-
-try:
-    NokiaLCD.setText("Time: 14:02", 0)
-    NokiaLCD.setText("Depth: 11cm", 1)
-    NokiaLCD.setText("Food: 18:04", 2)
-    NokiaLCD.setText("Lamp: OFF", 3)
-    while True:
-        
-        NokiaLCD.show()
-        time.sleep(1)
-        NokiaLCD.setText("===== FISH =====", 4)
-        NokiaLCD.show()
-        time.sleep(1)
-        NokiaLCD.clear(4)
-        NokiaLCD.showImage("fish.jpg")
-        time.sleep(2)
-        NokiaLCD.setText("Time: 14:02", 0)
-        NokiaLCD.setText("Depth: 11cm", 1)
-        NokiaLCD.setText("Food: 18:04", 2)
-        NokiaLCD.setText("Lamp: OFF", 3)
-        NokiaLCD.show()
-        time.sleep(2)
-
-except KeyboardInterrupt:
-    NokiaLCD.clear()
-    NokiaLCD.setText("Goodbye!", 4)
-    NokiaLCD.show()

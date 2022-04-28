@@ -2,8 +2,11 @@ from classes.stepper import Stepper
 from classes.pushButton import PushButton
 from classes.ultrasonicSensor import UltrasonicSensor
 from classes.relay import Relay
+from classes.nokiaLCD import NokiaLCD
 import time
 import RPi.GPIO as GPIO
+import busio
+import board
 
 GPIO.setmode(GPIO.BCM)
 
@@ -22,12 +25,14 @@ buttonFour = PushButton(buttonPins[3])
 ultrasonic = UltrasonicSensor(ultrasonicEchoPin, ultrasonicTriggerPin)
 relayLamp = Relay(relayLampPin)
 relayPump = Relay(relayPumpPin)
+nokiaLCD = NokiaLCD(busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO), board.D22, board.CE1, board.D27)
 
 shouldRun = True
 lastButtonOne = False
 lastButtonTwo = False
 lastButtonThree = False
 lastButtonFour = False
+counter = 0
 
 # ====== MAIN ======
 relayLamp.set(True)
@@ -35,6 +40,7 @@ relayPump.set(True)
 
 print("Rotating CW")
 stepper.rotate(360, "CW")
+nokiaLCD.setText("==== FISH ====", 0)
 
 try:
     while True:
@@ -73,6 +79,12 @@ try:
         if lastButtonFour != buttonFourStatus:
             print("Button Four: " + str(buttonFourStatus))
             lastButtonFour = buttonFourStatus
+            if buttonFourStatus:
+                counter += 1
+                nokiaLCD.clear(1)
+                nokiaLCD.setText("Push Count: " + str(counter), 1)
+                nokiaLCD.show()
+
 
 
 except KeyboardInterrupt:
