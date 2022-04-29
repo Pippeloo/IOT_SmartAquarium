@@ -5,7 +5,6 @@
 
 # import the necessary packages
 import requests
-import time
 
 # ====== CLASSES ======
 class UbeacSensor:
@@ -26,24 +25,3 @@ class UbeacSensor:
     
     def send(self):
         requests.request("POST", self.url, json=self.json)
-
-
-# ====== MAIN ======
-ubeacSensor = UbeacSensor("https://pippeloo.hub.ubeac.io/Station", "Raspberry-Pi")
-
-try:
-    ubeacSensor.set("Lamp", 100)
-    ubeacSensor.set("Water Depth", 20)
-    ubeacSensor.set("Pump", 100)
-    ubeacSensor.send()
-    time.sleep(2)
-    ubeacSensor.set("Lamp", 0)
-    ubeacSensor.set("Water Depth", 0)
-    ubeacSensor.set("Pump", 0)
-    ubeacSensor.send()
-    time.sleep(2)
-
-except KeyboardInterrupt:
-    pass
-
-
