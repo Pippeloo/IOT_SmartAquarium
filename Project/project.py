@@ -86,6 +86,11 @@ infoScreenTwo = 5000
 lastScreenTime = 0
 screenNumber = 0
 
+# Create variables for the ubeac iot cloud
+lastUbeac = 0
+ubeacTime = 10000
+oldUbeacJson = {}
+
 # ====== MAIN ======
 print('Starting...')
 
@@ -222,6 +227,24 @@ try:
                 nokiaLCD.show()
                 lastScreenTime = millis()
                 screenNumber = 0
+
+        # --- Ubeac ---
+        if (millis() - lastUbeac) > ubeacTime:
+            if json.dumps(ubeacSensor.json) != oldUbeacJson:
+                if relayLamp.status():
+                    ubeacSensor.set("Lamp", 100)
+                else:
+                    ubeacSensor.set("Lamp", 0)
+
+                if relayPump.status():
+                    ubeacSensor.set("Pump", 100)
+                else:
+                    ubeacSensor.set("Pump", 0)
+
+                ubeacSensor.set("Water Depth", round(waterDistance, 1))
+                ubeacSensor.send()
+
+                lastUbeac = millis()
 
 
 except KeyboardInterrupt:
