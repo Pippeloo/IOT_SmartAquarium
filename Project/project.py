@@ -245,6 +245,9 @@ try:
                 ubeacSensor.send()
 
                 lastUbeac = millis()
+        
+        # --- HomeBridge ---
+        
 
 
 except KeyboardInterrupt:
