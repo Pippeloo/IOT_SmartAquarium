@@ -50,33 +50,97 @@ relayPump.set(False)
 lastWaterLevelMeasurement = 0
 waterDistance = 0
 pumping = False
+forcePump = False
 refreshTime = 2000
+
+# Create variables for the lamp
+lastLampState = False
+lastButtonThree = False
+buttonThreeStatus = False
+debounceButtonThree = 0
+timeLampOn = "08:00:00"
+timeLampOff = "20:00:00"
+checkedOn = False
+checkedOff = False
 
 # ===== FUNSTIONS =====
 def millis():
     return round(time.time() * 1000)
+
+def toSeconds(t):
+    h, m, s = [int(i) for i in t.split(':')]
+    return 3600*h + 60*m + s
 
 # ====== MAIN ======
 print('Starting...')
 
 try:
     while True:
-        if (millis() - lastWaterLevelMeasurement) > refreshTime:
-            waterDistance = ultrasonic.getDistance()
-            lastWaterLevelMeasurement = millis()
-            print("Water distance: " + str(round(waterDistance, 2)) + " cm")
-            if (waterDistance > 5) and (not pumping):
-                print("=== START PUMPING ===")
-                relayPump.set(True)
-                pumping = True
-                refreshTime = 200
+        currentTime = time.strftime("%H:%M:%S")
 
-            if pumping and (waterDistance < 3):
-                print("=== STOP PUMPING ===")
+        # --- WATER LEVEL ---
+        if not buttonFour.isPressed():
+            if forcePump:
+                print("=== STOP MANUAL PUMPING ===")
+                forcePump = False
                 relayPump.set(False)
-                pumping = False
-                refreshTime = 2000
+            if (millis() - lastWaterLevelMeasurement) > refreshTime:
+                waterDistance = ultrasonic.getDistance()
+                lastWaterLevelMeasurement = millis()
+                print("Water distance: " + str(round(waterDistance, 2)) + " cm")
+                if (waterDistance > 5) and (not pumping):
+                    print("=== START PUMPING ===")
+                    relayPump.set(True)
+                    pumping = True
+                    refreshTime = 200
 
+                if pumping and (waterDistance < 3):
+                    print("=== STOP PUMPING ===")
+                    relayPump.set(False)
+                    pumping = False
+                    refreshTime = 2000
+        else:
+            if not forcePump:
+                print("=== START MANUAL PUMPING ===")
+                forcePump = True
+                relayPump.set(True)
+            if (millis() - lastWaterLevelMeasurement) > 200:
+                waterDistance = ultrasonic.getDistance()
+                lastWaterLevelMeasurement = millis()
+                print("Water distance: " + str(round(waterDistance, 2)) + " cm")
+
+        # --- LAMP ---
+        # Toggle button
+        currentButtonThree = buttonThree.isPressed(False)
+
+        if currentButtonThree != lastButtonThree:
+            debounceButtonThree = millis()
+
+        if (millis() - debounceButtonThree) > 50:
+            if buttonThreeStatus != currentButtonThree:
+                buttonThreeStatus = currentButtonThree
+                # toggle the lamp when a pulse is detected
+                if buttonThreeStatus:
+                    relayLamp.toggle()
+                    if relayLamp.status():
+                        print("=== LAMP ON ===")
+                        print(millis())
+                    else:
+                        print("=== LAMP OFF ===")
+        
+        lastButtonThree = currentButtonThree
+
+        # Check the time
+        if toSeconds(currentTime) >= toSeconds(timeLampOn) and toSeconds(currentTime) < toSeconds(timeLampOff):
+            if not checkedOn:
+                relayLamp.set(True)
+                checkedOn = True
+                checkedOff = False
+        else:
+            if not checkedOff:
+                relayLamp.set(False)
+                checkedOn = False
+                checkedOff = True
 
 except KeyboardInterrupt:
     print('Stopped')

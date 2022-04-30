@@ -27,7 +27,7 @@ class Relay:
         GPIO.output(self.pin, not state)
 
     def toggle(self):
-        self.set(not GPIO.input(self.pin))
+        self.set(GPIO.input(self.pin))
     
     def status(self):
         return not GPIO.input(self.pin)
