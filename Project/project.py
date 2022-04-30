@@ -50,6 +50,7 @@ relayPump.set(False)
 lastWaterLevelMeasurement = 0
 waterDistance = 0
 pumping = False
+refreshTime = 2000
 
 # ===== FUNSTIONS =====
 def millis():
@@ -60,20 +61,21 @@ print('Starting...')
 
 try:
     while True:
-        if (millis() - lastWaterLevelMeasurement) > 2000:
+        if (millis() - lastWaterLevelMeasurement) > refreshTime:
             waterDistance = ultrasonic.getDistance()
             lastWaterLevelMeasurement = millis()
             print("Water distance: " + str(round(waterDistance, 2)) + " cm")
-            if waterDistance < 5:
-                if not pumping:
-                    print("=== START PUMPING ===")
-                    relayPump.set(True)
-                    pumping = True
-            else:
-                if pumping:
-                    print("=== STOP PUMPING ===")
-                    relayPump.set(False)
-                    pumping = False
+            if (waterDistance > 5) and (not pumping):
+                print("=== START PUMPING ===")
+                relayPump.set(True)
+                pumping = True
+                refreshTime = 200
+
+            if pumping and (waterDistance < 3):
+                print("=== STOP PUMPING ===")
+                relayPump.set(False)
+                pumping = False
+                refreshTime = 2000
 
 
 except KeyboardInterrupt:
