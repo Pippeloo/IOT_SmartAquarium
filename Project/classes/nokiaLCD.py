@@ -75,3 +75,4 @@ class NokiaLCD:
         self.image = Image.open(image)
         self.display.image(self.image.resize((self.display.width, self.display.height), Image.ANTIALIAS).convert('1'))
         self.display.show()
+        return file_path

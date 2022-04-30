@@ -79,6 +79,13 @@ buttonOneStatus = False
 lastButtonOne = False
 lastButtonTwo = False
 
+# Create variables for the LCD
+logoScreen = 2000
+infoScreenOne = 5000
+infoScreenTwo = 5000
+lastScreenTime = 0
+screenNumber = 0
+
 # ====== MAIN ======
 print('Starting...')
 
@@ -164,6 +171,58 @@ try:
             if buttonTwoStatus:
                 print("=== MANUAL FEEDING CCW ===")
                 stepper.rotate(36, "CCW")
+        
+        # --- Display ---
+        if screenNumber == 0:
+            if (millis() - lastScreenTime) > infoScreenTwo:
+                try:
+                    nokiaLCD.showImage("assets/fish.jpg")
+                except:
+                    nokiaLCD.setText("ERR: IMG NOT", 0)
+                    nokiaLCD.setText("FOUND", 1)
+                    nokiaLCD.show()
+
+                lastScreenTime = millis()
+                screenNumber = 1
+        elif screenNumber == 1:
+            if (millis() - lastScreenTime) > logoScreen:
+                nokiaLCD.clear()
+                nokiaLCD.setText(" === FISH === ", 0)
+                nokiaLCD.setText("Time:" + time.strftime("%H:%M"), 1)
+                nokiaLCD.setText("Water:" + str(round(waterDistance, 1)) + " cm", 2)
+                timeTillFood = time.strftime("%M:%S", time.gmtime((millis() - lastFeeder - feederTime) * -1 / 1000)) 
+                nokiaLCD.setText("Food:" + timeTillFood, 3)
+                nokiaLCD.setText("==============", 4)
+                nokiaLCD.show()
+                lastScreenTime = millis()
+                screenNumber = 2
+        elif screenNumber == 2:
+            if (millis() - lastScreenTime) > infoScreenOne:
+                nokiaLCD.clear()
+                nokiaLCD.setText("==== FISH ====", 0)
+                nokiaLCD.setText("Time:" + time.strftime("%H:%M"), 1)
+                #Show the current lamp status
+                if relayLamp.status():
+                    nokiaLCD.setText("Lamp: ON", 2)
+                else:
+                    nokiaLCD.setText("Lamp: OFF", 2)
+                if relayLamp.status():
+                    if toSeconds(currentTime) <= toSeconds(timeLampOff):
+                        timeTillLampOff = toSeconds(timeLampOff) - toSeconds(currentTime)
+                    else:
+                        timeTillLampOff = toSeconds("23:59:59") - toSeconds(currentTime) + toSeconds(timeLampOff)
+                    nokiaLCD.setText("Lamp OFF:" + time.strftime("%H:%M", time.gmtime(timeTillLampOff)), 3)
+                else:
+                    if toSeconds(currentTime) >= toSeconds(timeLampOn):
+                        timeTillLampOn = toSeconds(timeLampOn) - toSeconds(currentTime)
+                    else:
+                        timeTillLampOn = toSeconds(timeLampOn) - toSeconds(currentTime)
+                    nokiaLCD.setText("Lamp ON:" + time.strftime("%H:%M", time.gmtime(timeTillLampOn)), 3)
+                nokiaLCD.setText("==============", 4)
+                nokiaLCD.show()
+                lastScreenTime = millis()
+                screenNumber = 0
+
 
 except KeyboardInterrupt:
     print('Stopped')
