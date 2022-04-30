@@ -1,0 +1,35 @@
+{
+    "bridge": {
+        "name": "Homebridge F8E6",
+        "username": "0E:67:94:82:F8:E6",
+        "port": 52624,
+        "pin": "031-45-154"
+    },
+    "accessories": [
+        {
+            "accessory": "SimpleHttpSwitch",
+            "http_method": "GET",
+            "ignore_https_security": false,
+            "set_off_url": "http://localhost:6969/light/off",
+            "status_url": "http://localhost:6969/light/status",
+            "on_if_this_fn": "(obj)=>obj.status ? obj.status=='on' : null",
+            "on_if_this": {
+                "status": "on"
+            },
+            "off_if_this": {
+                "status": "off"
+            },
+            "set_on_url": "http://localhost:6969/light/on",
+            "polling": true,
+            "pollingInterval": 5,
+            "name": "Fish Light"
+        }
+    ],
+    "platforms": [
+        {
+            "name": "Config",
+            "port": 8581,
+            "platform": "config"
+        }
+    ]
+}
