@@ -19,6 +19,14 @@ import board
 import json
 import time
 
+# ===== FUNSTIONS =====
+def millis():
+    return round(time.time() * 1000)
+
+def toSeconds(t):
+    h, m, s = [int(i) for i in t.split(':')]
+    return 3600*h + 60*m + s
+
 # ===== SETUP =====
 # Setup the pins
 STEPPER_PINS = [26, 19, 13, 6]
@@ -63,13 +71,13 @@ timeLampOff = "20:00:00"
 checkedOn = False
 checkedOff = False
 
-# ===== FUNSTIONS =====
-def millis():
-    return round(time.time() * 1000)
-
-def toSeconds(t):
-    h, m, s = [int(i) for i in t.split(':')]
-    return 3600*h + 60*m + s
+# Create variables for the feeder
+lastFeeder = millis() - 840000 # - 14 minutes
+feederTime = 900000 # 15 minutes
+buttonTwoStatus = False
+buttonOneStatus = False
+lastButtonOne = False
+lastButtonTwo = False
 
 # ====== MAIN ======
 print('Starting...')
@@ -77,6 +85,7 @@ print('Starting...')
 try:
     while True:
         currentTime = time.strftime("%H:%M:%S")
+        stepper.active()
 
         # --- WATER LEVEL ---
         if not buttonFour.isPressed():
@@ -111,24 +120,18 @@ try:
 
         # --- LAMP ---
         # Toggle button
-        currentButtonThree = buttonThree.isPressed(False)
-
-        if currentButtonThree != lastButtonThree:
-            debounceButtonThree = millis()
-
-        if (millis() - debounceButtonThree) > 50:
-            if buttonThreeStatus != currentButtonThree:
-                buttonThreeStatus = currentButtonThree
-                # toggle the lamp when a pulse is detected
-                if buttonThreeStatus:
-                    relayLamp.toggle()
-                    if relayLamp.status():
-                        print("=== LAMP ON ===")
-                        print(millis())
-                    else:
-                        print("=== LAMP OFF ===")
-        
-        lastButtonThree = currentButtonThree
+        currentButtonThree = buttonThree.isPressed()
+        if buttonThreeStatus != currentButtonThree:
+            buttonThreeStatus = currentButtonThree
+            # toggle the lamp when a pulse is detected
+            if buttonThreeStatus:
+                relayLamp.toggle()
+                if relayLamp.status():
+                    print("=== LAMP ON ===")
+                    print(millis())
+                else:
+                    print("=== LAMP OFF ===")
+    
 
         # Check the time
         if toSeconds(currentTime) >= toSeconds(timeLampOn) and toSeconds(currentTime) < toSeconds(timeLampOff):
@@ -141,6 +144,26 @@ try:
                 relayLamp.set(False)
                 checkedOn = False
                 checkedOff = True
+
+        # --- Stepper ---
+        if millis() - lastFeeder > feederTime:
+            print("=== FEEDER ===")
+            stepper.rotate(36, "CW")
+            lastFeeder = millis()
+
+        buttonOneStatus = buttonOne.isPressed(True)
+        if lastButtonOne != buttonOneStatus:
+            lastButtonOne = buttonOneStatus
+            if buttonOneStatus:
+                print("=== MANUAL FEEDING CW ===")
+                stepper.rotate(36, "CW")
+
+        buttonTwoStatus = buttonTwo.isPressed(True)
+        if lastButtonTwo != buttonTwoStatus:
+            lastButtonTwo = buttonTwoStatus
+            if buttonTwoStatus:
+                print("=== MANUAL FEEDING CCW ===")
+                stepper.rotate(36, "CCW")
 
 except KeyboardInterrupt:
     print('Stopped')
