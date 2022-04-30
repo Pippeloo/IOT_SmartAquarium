@@ -246,10 +246,9 @@ try:
 
                 lastUbeac = millis()
         
-        # --- HomeBridge ---
-        
 
 
 except KeyboardInterrupt:
     print('Stopped')
     GPIO.cleanup()
+    pass
