@@ -1,0 +1,12 @@
+version: '2'
+services:
+  smart-aquarium:
+    image: ghcr.io/pippeloo/smart-aquarium:v1.1.0
+    container_name: smart-aquarium
+    restart: always
+    network_mode: host
+    environment:
+      - TZ=Europe/Brussels
+      - PGID=1000
+      - PUID=1000
+
