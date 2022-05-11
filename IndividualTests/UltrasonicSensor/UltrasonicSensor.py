@@ -37,14 +37,14 @@ class UltrasonicSensor:
         GPIO.output(self.trigPin, False)
  
         self.startTime = time.time()
-        self.stopTime = time.time()
- 
+        self.timeout = self.startTime + 0.04
         # save StartTime
-        while GPIO.input(self.echoPin) == 0:
+        while GPIO.input(self.echoPin) == 0 and self.startTime < self.timeout:
             self.startTime = time.time()
- 
+
+        self.stopTime = time.time()
          # save time of arrival
-        while GPIO.input(self.echoPin) == 1:
+        while GPIO.input(self.echoPin) == 1 and self.stopTime < self.timeout:
             self.stopTime = time.time()
  
         # time difference between start and arrival
@@ -66,7 +66,7 @@ try:
     while True:
         distance = str(ultrasonicSensor.getDistance()) + " cm"
         print(distance)
-        time.sleep(0.5)
+        time.sleep(0.1)
         
 
 

@@ -12,6 +12,7 @@ import time
 class UltrasonicSensor:
     
     def __init__(self, echoPin, trigPin):
+        self.timeout = time.time() + 0.04
         self.echoPin = echoPin
         self.trigPin = trigPin
         # set the pins
@@ -29,14 +30,14 @@ class UltrasonicSensor:
         GPIO.output(self.trigPin, False)
  
         self.startTime = time.time()
-        self.stopTime = time.time()
- 
+        self.timeout = self.startTime + 0.04
         # save StartTime
-        while GPIO.input(self.echoPin) == 0:
+        while GPIO.input(self.echoPin) == 0 and self.startTime < self.timeout:
             self.startTime = time.time()
- 
+
+        self.stopTime = time.time()
          # save time of arrival
-        while GPIO.input(self.echoPin) == 1:
+        while GPIO.input(self.echoPin) == 1 and self.stopTime < self.timeout:
             self.stopTime = time.time()
  
         # time difference between start and arrival
