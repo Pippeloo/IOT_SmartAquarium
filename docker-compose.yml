@@ -1,7 +1,7 @@
 version: '2'
 services:
   smart-aquarium:
-    image: ghcr.io/pippeloo/smart-aquarium:v1.1.3
+    image: ghcr.io/pippeloo/smart-aquarium:v1.1.5
     container_name: smart-aquarium
     restart: always
     network_mode: host
