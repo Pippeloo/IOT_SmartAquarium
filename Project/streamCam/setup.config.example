@@ -1,3 +1,4 @@
+# !!! NOT USED BECAUSE OF A BUG !!!
 # -=====- BASIC SETUP -=====-
 # Twitch Stream setup
 TWITCH_STREAM_URL=rtmp://live.twitch.tv/app/
