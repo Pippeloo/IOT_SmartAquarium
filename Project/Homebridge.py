@@ -14,6 +14,7 @@ import time
 import json
 
 # ===== FUNSTIONS =====
+# This function returns the time in milliseconds
 def millis():
     return round(time.time() * 1000)
 
@@ -37,13 +38,18 @@ timeUntillLightOff = 9000 # 15 minutes
 
 # --- SETUP CLASS ---
 class MyServer(BaseHTTPRequestHandler):
+    # This function is called when the server receives a GET request
     def do_GET(self):
+        # Use the global variables
         global timerBusy, timerStart, timeUntillLightOff
+        # Return that the request was successful
         self.send_response(200)
+        # Return the content type
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        #self.wfile.write(bytes("<html><body>"+ json.dumps(json_data) +"</body></html>", "utf-8"))
+        # Check the requested path
         if self.path == "/light/status":
+            # Save the state of the relay
             if relayLamp.status():
                 json_data["status"] = "on"
             else:
@@ -55,17 +61,23 @@ class MyServer(BaseHTTPRequestHandler):
                 relayLamp.set(False)
                 json_data["status"] = "off"
 
+            # Return the json data
             self.wfile.write(bytes(json.dumps(json_data), "utf-8"))
         if self.path == "/light/on":
+            # Set the state of the relay
             json_data["status"] = "on"
             relayLamp.set(True)
+            # Check if the timer is busy
             if not timerBusy:
                 timerBusy = True
                 timerStart = millis()
+            # Return the json data
             self.wfile.write(bytes(json.dumps(json_data), "utf-8"))
         if self.path == "/light/off":
+            # Set the state of the relay
             json_data["status"] = "off"
             relayLamp.set(False)
+            # Return the json data
             self.wfile.write(bytes(json.dumps(json_data), "utf-8"))
 
     def log_message(self, format, *args):
@@ -73,11 +85,13 @@ class MyServer(BaseHTTPRequestHandler):
 
 
 # ===== MAIN =====    
-if __name__ == "__main__":        
+if __name__ == "__main__":
+    # Create the server
     webServer = HTTPServer((HOSTNAME, SERVER_PORT), MyServer)
     print("Server started http://%s:%s" % (HOSTNAME, SERVER_PORT))
 
     try:
+        # Start the server
         webServer.serve_forever()
     except KeyboardInterrupt:
         GPIO.cleanup()

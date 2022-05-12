@@ -21,6 +21,7 @@ class UltrasonicSensor:
         # set the trigger to low
         GPIO.output(self.trigPin, GPIO.LOW)
 
+    # This function returns the distance in cm
     def getDistance(self):
         # set Trigger to HIGH
         GPIO.output(self.trigPin, True)

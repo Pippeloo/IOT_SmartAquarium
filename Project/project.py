@@ -96,35 +96,46 @@ print('Starting...')
 
 try:
     while True:
+        # This must be done everytime the loop starts
         currentTime = time.strftime("%H:%M:%S")
         stepper.active()
 
         # --- WATER LEVEL ---
+        # Check if button is not pressed
         if not buttonFour.isPressed():
+            # check if the pump was forced to pump
             if forcePump:
+                # Stop the pump
                 print("=== STOP MANUAL PUMPING ===")
                 forcePump = False
                 relayPump.set(False)
+            # return the water level every specific time
             if (millis() - lastWaterLevelMeasurement) > refreshTime:
+                # Get the water level
                 waterDistance = ultrasonic.getDistance()
                 lastWaterLevelMeasurement = millis()
+                # Print the water level in the console
                 print("Water distance: " + str(round(waterDistance, 2)) + " cm")
+                # Check if the water level is below the threshold
                 if (waterDistance > 5) and (not pumping):
                     print("=== START PUMPING ===")
                     relayPump.set(True)
                     pumping = True
                     refreshTime = 200
-
+                # Check if the water level is above the threshold
                 if pumping and (waterDistance < 3):
                     print("=== STOP PUMPING ===")
                     relayPump.set(False)
                     pumping = False
                     refreshTime = 2000
         else:
+            # check if the pump was not yet forced to pump
             if not forcePump:
+                # Start the pump
                 print("=== START MANUAL PUMPING ===")
                 forcePump = True
                 relayPump.set(True)
+            # return the water level every specific time
             if (millis() - lastWaterLevelMeasurement) > 200:
                 waterDistance = ultrasonic.getDistance()
                 lastWaterLevelMeasurement = millis()
@@ -137,47 +148,56 @@ try:
             buttonThreeStatus = currentButtonThree
             # toggle the lamp when a pulse is detected
             if buttonThreeStatus:
+                # toggle the lamp
                 relayLamp.toggle()
+                # check if the lamp is on
                 if relayLamp.status():
                     print("=== LAMP ON ===")
-                    print(millis())
                 else:
                     print("=== LAMP OFF ===")
     
 
         # Check the time
         if toSeconds(currentTime) >= toSeconds(timeLampOn) and toSeconds(currentTime) < toSeconds(timeLampOff):
+            # check if the lamp is not on
             if not checkedOn:
+                # set the lamp on
                 relayLamp.set(True)
                 checkedOn = True
                 checkedOff = False
         else:
+            # check if the lamp is not off
             if not checkedOff:
+                # set the lamp off
                 relayLamp.set(False)
                 checkedOn = False
                 checkedOff = True
 
         # --- Stepper ---
+        # Check if the time to feed the fish is reached
         if millis() - lastFeeder > feederTime:
             print("=== FEEDER ===")
-            stepper.rotate(36, "CW")
+            stepper.rotate(15.6521739, "CW")
             lastFeeder = millis()
-
+        # Get the button status
         buttonOneStatus = buttonOne.isPressed(True)
+        # Check if the button is pressed
         if lastButtonOne != buttonOneStatus:
             lastButtonOne = buttonOneStatus
             if buttonOneStatus:
                 print("=== MANUAL FEEDING CW ===")
-                stepper.rotate(36, "CW")
-
+                stepper.rotate(15.6521739, "CW")
+        # Get the button status
         buttonTwoStatus = buttonTwo.isPressed(True)
+        # Check if the button is pressed
         if lastButtonTwo != buttonTwoStatus:
             lastButtonTwo = buttonTwoStatus
             if buttonTwoStatus:
                 print("=== MANUAL FEEDING CCW ===")
-                stepper.rotate(36, "CCW")
+                stepper.rotate(15.6521739, "CCW")
         
         # --- Display ---
+        # Check if the time to display the logo is reached
         if screenNumber == 0:
             if (millis() - lastScreenTime) > infoScreenTwo:
                 try:
@@ -188,6 +208,7 @@ try:
                     nokiaLCD.show()
 
                 lastScreenTime = millis()
+                # Set the next screen
                 screenNumber = 1
         elif screenNumber == 1:
             if (millis() - lastScreenTime) > logoScreen:
@@ -229,7 +250,9 @@ try:
                 screenNumber = 0
 
         # --- Ubeac ---
+        # Post the data every postTime
         if (millis() - lastUbeac) > ubeacTime:
+            # Check if the data changed
             if json.dumps(ubeacSensor.json) != oldUbeacJson:
                 if relayLamp.status():
                     ubeacSensor.set("Lamp", 100)

@@ -38,19 +38,26 @@ class Stepper:
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, self.coils[0][self.pins.index(pin)])
 
+    # this function must be called in the main loop to keep the stepper motor running
     def active(self):
+        # check if the motor is running
         if self.running:
+            # check if the rotation is finished
             if self.requestedRotation >= round(self.degreesCurrentRotation, 2):
+                # check it is time for the next step
                 if self.lastMillis < self.currentMillis() - (self.delay*1000):
                     self.lastMillis = self.currentMillis()
                     self.doSteps(self.direction)
                     self.degreesCurrentRotation += self.degreesPerHalfStep
             else:
+                # stop the motor
                 self.running = False
 
+    # this function returns the current time in milliseconds
     def currentMillis(self):
         return int(round(time.time() * 1000))
     
+    # this function makes the stepper motor move one step in the specified direction
     def doSteps(self, direction):
         if direction == "CW":
             self.steps += 1
@@ -64,9 +71,11 @@ class Stepper:
         for i in range(len(self.pins)):
             GPIO.output(self.pins[i], coil[i])
 
+    # this function returns the state current rotation
     def getDegrees(self):
         return (self.steps * self.degreesPerHalfStep) % 360
     
+    # this function requests the stepper motor to rotate the specified number of degrees
     def rotate(self, degrees, direction):
         if direction == "CW" or direction == "CCW":
             self.direction = direction
@@ -74,5 +83,6 @@ class Stepper:
             self.degreesCurrentRotation = 0
             self.running = True
     
+    # this function stops the stepper motor
     def stop(self):
         self.running = False
