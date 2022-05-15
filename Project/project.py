@@ -124,23 +124,25 @@ try:
                         print("=== START PUMPING ===")
                         relayPump.set(True)
                         pumping = True
+                        amountVerified = 0
                     else:
                         amountVerified += 1
                     refreshTime = 200
-                else:
-                    amountVerified = 0
-                    refreshTime = 2000
                 # Check if the water level is above the threshold
-                if pumping and (waterDistance < 3):
+                elif pumping and (waterDistance < 3):
                     # Verify the water level 3 times
                     if amountVerified >= 3:
                         print("=== STOP PUMPING ===")
                         relayPump.set(False)
                         pumping = False
                         refreshTime = 2000
+                        amountVerified = 0
                     else:
                         amountVerified += 1
                     refreshTime = 200
+                else:
+                    amountVerified = 0
+                    refreshTime = 2000
 
         else:
             # check if the pump was not yet forced to pump
