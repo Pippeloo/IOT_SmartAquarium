@@ -60,6 +60,7 @@ waterDistance = 0
 pumping = False
 forcePump = False
 refreshTime = 2000
+amountVerified = 0
 
 # Create variables for the lamp
 lastLampState = False
@@ -118,16 +119,27 @@ try:
                 print("Water distance: " + str(round(waterDistance, 2)) + " cm")
                 # Check if the water level is below the threshold
                 if (waterDistance > 5) and (not pumping):
-                    print("=== START PUMPING ===")
-                    relayPump.set(True)
-                    pumping = True
+                    if amountVerified >= 3:
+                        print("=== START PUMPING ===")
+                        relayPump.set(True)
+                        pumping = True
+                    else:
+                        amountVerified += 1
                     refreshTime = 200
+                else:
+                    amountVerified = 0
+                    refreshTime = 2000
                 # Check if the water level is above the threshold
                 if pumping and (waterDistance < 3):
-                    print("=== STOP PUMPING ===")
-                    relayPump.set(False)
-                    pumping = False
-                    refreshTime = 2000
+                    if amountVerified >= 3:
+                        print("=== STOP PUMPING ===")
+                        relayPump.set(False)
+                        pumping = False
+                        refreshTime = 2000
+                    else:
+                        amountVerified += 1
+                    refreshTime = 200
+
         else:
             # check if the pump was not yet forced to pump
             if not forcePump:
