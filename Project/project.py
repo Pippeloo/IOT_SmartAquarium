@@ -119,6 +119,7 @@ try:
                 print("Water distance: " + str(round(waterDistance, 2)) + " cm")
                 # Check if the water level is below the threshold
                 if (waterDistance > 5) and (not pumping):
+                    # Verify the water level 3 times
                     if amountVerified >= 3:
                         print("=== START PUMPING ===")
                         relayPump.set(True)
@@ -131,6 +132,7 @@ try:
                     refreshTime = 2000
                 # Check if the water level is above the threshold
                 if pumping and (waterDistance < 3):
+                    # Verify the water level 3 times
                     if amountVerified >= 3:
                         print("=== STOP PUMPING ===")
                         relayPump.set(False)
